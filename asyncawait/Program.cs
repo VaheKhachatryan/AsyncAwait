@@ -22,8 +22,22 @@ namespace asyncawait
 
 			public void MoveNext()
 			{
-				Task task = new Task(outer.Operation);
-				task.Start();
+				if (state == -1)
+				{
+					Console.WriteLine("PART 1 ThreadId {0}", Thread.CurrentThread.ManagedThreadId);
+
+					Console.WriteLine("Operation ThreadId {0}", Thread.CurrentThread.ManagedThreadId);
+					Task task = new Task(outer.Operation);
+					task.Start();
+
+					state = 0;
+
+					TaskAwaiter awaiter = task.GetAwaiter();
+					builder.AwaitOnCompleted(ref awaiter, ref this);
+					return;
+				}
+
+				Console.WriteLine("PART 2 ThreadId {0}", Thread.CurrentThread.ManagedThreadId);
 			}
 
 			public void SetStateMachine(IAsyncStateMachine stateMachine)
@@ -56,7 +70,7 @@ namespace asyncawait
 			Console.WriteLine("PART 1 ThreadId {0}", Thread.CurrentThread.ManagedThreadId);
 			Task task = new Task(Operation);
 			task.Start();
-			//await task;
+			await task;
 			Console.WriteLine("PART 2 ThreadId {0}", Thread.CurrentThread.ManagedThreadId);
 		}
 	}
